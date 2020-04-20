@@ -30,7 +30,7 @@ public class User implements Serializable{
 	private Long id;
 	
 	@Column
-	private String fisrName;
+	private String firstName;
 
 	@Column
 	private String lastName;
@@ -66,15 +66,15 @@ public class User implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
 
-
-	public String getFisrName() {
-		return fisrName;
+	public String getFirstName() {
+		return firstName;
 	}
 
 
-	public void setFisrName(String fisrName) {
-		this.fisrName = fisrName;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
 
@@ -146,7 +146,7 @@ public class User implements Serializable{
 		int result = 1;
 		result = prime * result + ((confirmPassword == null) ? 0 : confirmPassword.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
-		result = prime * result + ((fisrName == null) ? 0 : fisrName.hashCode());
+		result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
@@ -175,10 +175,10 @@ public class User implements Serializable{
 				return false;
 		} else if (!email.equals(other.email))
 			return false;
-		if (fisrName == null) {
-			if (other.fisrName != null)
+		if (firstName == null) {
+			if (other.firstName != null)
 				return false;
-		} else if (!fisrName.equals(other.fisrName))
+		} else if (!firstName.equals(other.firstName))
 			return false;
 		if (id == null) {
 			if (other.id != null)
@@ -211,7 +211,7 @@ public class User implements Serializable{
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", fisrName=" + fisrName + ", lastName=" + lastName + ", email=" + email
+		return "User [id=" + id + ", fisrName=" + firstName + ", lastName=" + lastName + ", email=" + email
 				+ ", username=" + username + ", password=" + password + ", confirmPassword=" + confirmPassword
 				+ ", roles=" + roles + "]";
 	}
