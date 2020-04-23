@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tienda.Exception.UsernameOrIdNotFound;
 import com.tienda.dto.ChangePasswordForm;
 import com.tienda.model.User;
 import com.tienda.repository.UserRepository;
@@ -64,8 +65,8 @@ public class UserServiceImpl implements UserService{
 
 
 	@Override
-	public User getUserById(Long id) throws Exception {
-		return repository.findById(id).orElseThrow(() ->  new Exception("EL usuaio no existe"));
+	public User getUserById(Long id) throws UsernameOrIdNotFound {
+		return repository.findById(id).orElseThrow(() ->  new UsernameOrIdNotFound("El Id del usuaio no existe."));
 	}
 
 
@@ -95,7 +96,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	public void deleteUser(Long id) throws Exception {
+	public void deleteUser(Long id) throws UsernameOrIdNotFound {
 		User user = getUserById(id);
 		repository.delete(user);
 	}
