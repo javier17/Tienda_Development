@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tienda.Exception.CustomeFieldValidationException;
 import com.tienda.Exception.UsernameOrIdNotFound;
 import com.tienda.dto.ChangePasswordForm;
 import com.tienda.model.User;
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService{
 	private boolean checkUsernameAvailable(User user) throws Exception {
 		Optional<User> userFound = repository.findByUsername(user.getUsername());
 		if(userFound.isPresent()) {
-			throw new Exception("Username no disponible");
+			throw new CustomeFieldValidationException("Username no disponible", "username");
 		}
 		return true;
 	}
@@ -41,11 +42,11 @@ public class UserServiceImpl implements UserService{
 	
 	private boolean checkPasswordValid(User user) throws Exception {
 		if(user.getConfirmPassword()==null || user.getConfirmPassword().isEmpty()) {
-			throw new Exception("Confirm Password es obligatorio");
+			throw new CustomeFieldValidationException("Confirm Password es obligatorio","confirmPassword");
 		}
 		
 		if(!user.getPassword().equals(user.getConfirmPassword())) {
-			throw new Exception("Password y Confirm Password no son iguales");
+			throw new CustomeFieldValidationException("Password y Confirm Password no son iguales","password");
 		}
 		return true;
 	}
@@ -123,18 +124,39 @@ public class UserServiceImpl implements UserService{
 	
 	
 	private boolean isLoggedUserADMIN() {
+		// Obtener el usuario logeado
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
 		UserDetails loggerUser = null;
+		Object roles = null;
+		
+		//Verificar que ese objeto traido de sesion es el usuario
 		if(principal instanceof UserDetails) {
 			loggerUser = (UserDetails)principal;
 			
-			loggerUser.getAuthorities().stream()
-			.filter(x -> "ADMIN".equals(x.getAuthority()))
+			roles = loggerUser.getAuthorities().stream()
+			.filter(x -> "ROLE_ADMIN".equals(x.getAuthority()))
 			.findFirst().orElse(null); //loggedUser = null;
 		}
-		return loggerUser != null ?true : false;
+		return roles != null ?true : false;
 	}
 	
 	
+	public User getLoggedUser() throws Exception{
+		//Obtener el usuario logeado.
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		UserDetails loggedUser = null;
+		
+		//Verificar que ese objeto traido de sesion es el usuario
+		if(principal instanceof UserDetails) {
+			loggedUser = (UserDetails) principal;
+		}
+		
+		User myUser = repository
+				.findByUsername(loggedUser.getUsername()).orElseThrow(() -> new Exception("Problemas obteniendo usaurio de sesion."));
+	
+		return myUser;
+	}
 
 }

@@ -1,5 +1,7 @@
 package com.tienda.controller;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -17,8 +19,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.tienda.Exception.CustomeFieldValidationException;
 import com.tienda.Exception.UsernameOrIdNotFound;
 import com.tienda.dto.ChangePasswordForm;
+import com.tienda.model.Role;
 import com.tienda.model.User;
 import com.tienda.repository.RoleRepository;
 import com.tienda.service.UserService;
@@ -38,6 +42,38 @@ public class UserController {
 		return "index";
 	}
 	
+	@GetMapping("/signup")
+	public String signup(Model model) {
+		Role userRole = roleRepository.findByName("USER");
+		List<Role> roles = Arrays.asList(userRole);
+		model.addAttribute("userForm", new User());
+		model.addAttribute("roles",roles);
+		model.addAttribute("signup",true);
+		
+		return "user-form/user-signup";
+	}
+	
+	@PostMapping("/signup")
+	public String signupAction(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model) {
+		Role userRole = roleRepository.findByName("USER");
+		List<Role> roles = Arrays.asList(userRole);
+		model.addAttribute("userForm", user);
+		model.addAttribute("roles",roles);
+		model.addAttribute("signup",true);
+		
+		if(result.hasErrors()) {
+			return "user-form/user-signup";
+		}else {
+			try {
+				userService.createUser(user);
+			} catch (CustomeFieldValidationException cfve) {
+				result.rejectValue(cfve.getFieldName(), null, cfve.getMessage());
+			}catch (Exception e) {
+				model.addAttribute("formErrorMessage",e.getMessage());
+			}
+		}
+		return index();
+	}
 	
 	
 	@GetMapping("/userForm")
@@ -59,7 +95,15 @@ public class UserController {
 				userService.createUser(user);
 				model.addAttribute("userForm", new User());
 				model.addAttribute("listTab","active");
-			} catch (Exception e) {
+			}catch (CustomeFieldValidationException e) {
+				result.rejectValue(e.getFieldName(),null, e.getMessage());
+				//model.addAttribute("formErrorMessage",e.getMessage());
+				model.addAttribute("userForm", user);
+				model.addAttribute("formTab","active");
+				model.addAttribute("userList", userService.getAllUsers());
+				model.addAttribute("roles",roleRepository.findAll());
+			} 
+			catch (Exception e) {
 				model.addAttribute("formErrorMessage",e.getMessage());
 				model.addAttribute("userForm", user);
 				model.addAttribute("formTab","active");
